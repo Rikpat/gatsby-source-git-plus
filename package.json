@@ -1,0 +1,28 @@
+{
+  "name": "gatsby-source-git-plus",
+  "version": "1.0.0",
+  "description": "Gatsby plugin for pulling files into Gatsby from Git repositories",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "tbd"
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "gatsby-source-plugin",
+    "git"
+  ],
+  "author": "Rikpat",
+  "license": "MIT",
+  "peerDependencies": {
+    "gatsby": ">2.0.0-alpha"
+  },
+  "dependencies": {
+    "nodegit": "^0.26.4",
+    "gatsby-source-filesystem": "^2.1.19",
+    "git-url-parse": "^11.1.1"
+  }
+}

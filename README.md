@@ -1,20 +1,103 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# gatsby-source-git-plus
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+A Gatsby source plugin that clones a specified repository and then uses gatsby-source-filesystem to create file nodes for the repository.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+It uses nodegit internally and generates `GitRemote` and `GitCommit` nodes with information about remotes and commits
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+### Dependencies
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+This plugin uses gatsby-source-filesystem as peer dependency, please install using
+
+```
+ npm install --save gatsby-source-filesystem
+```
+
+## How to install
+
+Install plugin from npm
+
+```
+ npm install --save gatsby-source-git-plus
+```
+
+## Available options
+
+- **name**: name of the source instance (gets stored in sourceInstanceName property on file)
+- **remote**: remote url. In case of using credentials, use `https://[username]:[password]@[remoteurl]/`
+- **branch**: not working currently
+- **Any options for gatsby-plugin-filesystem**
+
+## When do I use this plugin?
+
+Separating content from engine, having markdown files in a different repository than the gatsby code, or using multiple repositories for documentation purposes
+
+## Examples of usage
+
+```js
+// In your gatsby-config.js
+module.exports = {
+  plugins: [
+    // You can have multiple instances of this plugin
+    // to read source nodes from different repositories.
+    {
+      resolve: `gatsby-source-git`,
+      options: {
+        name: `gatsby-docs`,
+        remote: `https://github.com/gatsbyjs/gatsby.git`,
+        // Tailor which files get imported eg. import the docs folder from a codebase.
+        patterns: `docs/**/*`
+      }
+    },
+    {
+      resolve: `gatsby-source-git`,
+      options: {
+        name: `PAT-example`,
+        remote: `https://PAT:${PAT}@dev.azure.com/${pathToRepository}`,
+        patterns: `**/*`
+      }
+    }
+  ]
+};
+```
+
+## How to query for data
+
+This plugin generates file nodes using gatsby-source-filesystem, so querying of files is the same, with two added nodes, GitRemote, and array of GitCommits.
+
+The plugin loads reads all commits and creates nodes, then links the files to commits that modified them.
+
+The GitCommit node contains an author object with name and email, commit date, commit message and gitRemote.
+
+For example if you wanted to get all authors, and dates, to show the last edit and all editors of a file, you could just query
+
+```graphQL
+file {
+    gitCommit {
+        author {
+            email
+        }
+        date(formatString: "M/D/YYYY")
+    }
+}
+```
+
+and to show the latest commit use `file.gitCommit[0]`.
+
+## How to run tests
+
+Not implemented yet
+
+## How to develop locally
+
+## How to contribute
+
+Please make a PR, I don't have much time to work on this right now, but I would appreciate all help.
+
+## Todo
+
+- [ ] Unit testing
+- [ ] Caching
+- [ ] Cloning a single branch/specifying branch
+- [ ] Typescript (probably, the gatsby-node gets confusing really fast)
+- [ ] Remove duplicate code that exists in gatsby-source-filesystem and just create folders and call sourceInstanceNodes on gatsby-source-filesystem
+- [ ] Create queries for unique authors ordered by number of commits, and other useful queries
