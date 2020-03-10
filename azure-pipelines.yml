@@ -1,0 +1,62 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  - master
+
+pool:
+  vmImage: "ubuntu-latest"
+  demands: npm
+
+steps:
+  - checkout: self
+    persistCredentials: true
+
+  - task: CmdLine@2
+    inputs:
+      script: |
+        echo "ReleaseVersion: $(ReleaseVersion)"
+        if [ -z "$(ReleaseVersion)" ]
+        then
+          lastRelease=$(git tag --list Release-* | sort -r -V | head -n 1)
+          IFS='.' read -ra array <<< $lastRelease
+          array[2]=$((${array[2]}+1))
+          newRelease=$(printf ".%s" "${array[@]}")
+          newRelease="${newRelease:1}"
+          IFS='-' read -ra auxarray <<< $newRelease
+          echo "auxarray: $auxarray"
+          newRelease=${auxarray[1]}
+        else
+          newRelease=$(ReleaseVersion)
+        fi
+
+        if [ -z "$newRelease" ]
+        then
+          newRelease=1.0.0
+        fi
+
+        echo "lastRelease: $lastRelease"
+        echo "newRelease: $newRelease"
+
+        echo "##vso[task.setvariable variable=newRelease]$newRelease"
+    displayName: Calculate release version.
+
+  - task: Npm@1
+    inputs:
+      command: "custom"
+      customCommand: "version $(newRelease) --no-git-tag-version --allow-same-version"
+    displayName: npm version
+
+  - task: Npm@1
+    inputs:
+      command: "publish"
+    displayName: npm publish
+
+  - task: CmdLine@2
+    inputs:
+      script: |
+        git tag Release-$(newRelease)
+        git push origin Release-$(newRelease)
+    displayName: Tag Version in Git
