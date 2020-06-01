@@ -4,6 +4,8 @@ A Gatsby source plugin that clones a specified repository and then uses gatsby-s
 
 It uses nodegit internally and generates `GitRemote` and `GitCommit` nodes with information about remotes and commits
 
+This repository was inspired by [gatsby-source-git](https://github.com/stevetweeddale/gatsby-source-git), but it doesn't use shallow clone, to store all commits, to make it possible to query for users that modified files.
+
 ### Dependencies
 
 This plugin uses gatsby-source-filesystem as peer dependency, please install using
